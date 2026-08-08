@@ -367,7 +367,7 @@ async function signup() {
         });
     if (error) {
         message.textContent =
-            "登録できませんでした。";
+            "登録できませんでした。";+ error.message;
         console.error(error);
         return;
     }
