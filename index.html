@@ -438,19 +438,49 @@ function addMessage(text, type) {
     messages.scrollTop =
         messages.scrollHeight;
 }
-function sendMessage() {
-    const text =
-        input.value.trim();
+async function sendMessage() {
+    const text = input.value.trim();
     if (!text) return;
+
     addMessage(text, "user");
     input.value = "";
-    setTimeout(() => {
+
+    try {
+        const response = await fetch(
+            "あなたのSupabaseプロジェクトURL/functions/v1/aria-chat",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": SUPABASE_PUBLISHABLE_KEY,
+                    "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY
+                },
+                body: JSON.stringify({
+                    message: text
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Function error");
+        }
+
         addMessage(
-            "ふふ、ちゃんと受け取ったよ。\n" +
-            "今はまだ仮のARIAだけど、少しずつ本物のAIにしていこう。",
+            data.reply || "返事を受け取ったよ。",
             "aria"
         );
-    }, 500);
+
+    } catch (error) {
+        console.error(error);
+
+        addMessage(
+            "ごめんね、ARIAの通信でエラーが起きたみたい。\n" +
+            error.message,
+            "aria"
+        );
+    }
 }
 input.addEventListener(
     "keydown",
