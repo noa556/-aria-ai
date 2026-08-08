@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARIA v1.1</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    background: #0b0e13;
+    color: #f1f3f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 "Noto Sans JP", sans-serif;
+    height: 100vh;
+}
+button,
+input {
+    font: inherit;
+}
+.hidden {
+    display: none !important;
+}
+/* ===== LOGIN ===== */
+#loginScreen {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background:
+        radial-gradient(circle at 50% 30%, #202b38, transparent 55%),
+        #0b0e13;
+}
+.login-box {
+    width: 100%;
+    max-width: 380px;
+    padding: 30px;
+    border: 1px solid #2b3440;
+    border-radius: 24px;
+    background: #10141b;
+}
+.login-title {
+    text-align: center;
+    font-size: 30px;
+    margin-bottom: 5px;
+}
+.login-subtitle {
+    text-align: center;
+    color: #8993a1;
+    margin-bottom: 30px;
+    font-size: 13px;
+}
+.login-box input {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    border: 1px solid #303946;
+    background: #171c24;
+    color: white;
+    outline: none;
+}
+.login-box button {
+    width: 100%;
+    padding: 13px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 12px;
+    background: #dce5ed;
+    color: #11151b;
+    font-weight: 600;
+}
+#loginMessage {
+    margin-top: 15px;
+    text-align: center;
+    color: #aeb8c5;
+    font-size: 13px;
+}
+/* ===== ARIA ===== */
+.app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+.header {
+    height: 64px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #242a33;
+    background: #10141b;
+}
+.status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #8de0c0;
+    margin-right: 10px;
+    box-shadow: 0 0 10px #8de0c0;
+}
+.name {
+    font-size: 18px;
+    font-weight: 600;
+}
+.version {
+    margin-left: 8px;
+    font-size: 11px;
+    color: #8993a1;
+}
+.logout {
+    margin-left: auto;
+    border: 1px solid #303946;
+    background: transparent;
+    color: #aeb8c5;
+    border-radius: 10px;
+    padding: 7px 10px;
+}
+.main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+.character {
+    width: 38%;
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(180deg, #111720, #0b0e13);
+}
+.character-box {
+    width: 100%;
+    max-width: 360px;
+    aspect-ratio: 3 / 4;
+    border: 1px solid #2b3440;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(circle at 50% 30%, #26313f, transparent 55%),
+        #10141b;
+}
+.character-placeholder {
+    text-align: center;
+    color: #8d98a7;
+}
+.character-placeholder .symbol {
+    font-size: 60px;
+    margin-bottom: 15px;
+}
+.chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+.message {
+    max-width: 75%;
+    margin-bottom: 18px;
+    padding: 13px 16px;
+    border-radius: 17px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+.aria {
+    background: #171d26;
+    border: 1px solid #252e39;
+    margin-right: auto;
+}
+.user {
+    background: #263544;
+    margin-left: auto;
+}
+.input-area {
+    padding: 14px;
+    border-top: 1px solid #242a33;
+    background: #10141b;
+    display: flex;
+    gap: 10px;
+}
+.input-area input {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid #303946;
+    border-radius: 14px;
+    padding: 13px 15px;
+    background: #171c24;
+    color: white;
+    outline: none;
+}
+.input-area button {
+    border: none;
+    border-radius: 14px;
+    padding: 0 18px;
+    background: #dce5ed;
+    color: #11151b;
+    font-weight: 600;
+}
+@media (max-width: 700px) {
+    .main {
+        flex-direction: column;
+    }
+    .character {
+        width: 100%;
+        height: 36%;
+        min-width: 0;
+        padding: 10px;
+    }
+    .character-box {
+        max-width: 150px;
+    }
+    .messages {
+        padding: 14px;
+    }
+    .message {
+        max-width: 85%;
+    }
+}
+</style>
+</head>
+<body>
+<!-- LOGIN -->
+<div id="loginScreen">
+<div class="login-box">
+    <div class="login-title">ARIA</div>
+    <div class="login-subtitle">
+        Personal AI System · v1.1
+    </div>
+    <input
+        id="email"
+        type="email"
+        placeholder="メールアドレス"
+        autocomplete="email"
+    >
+    <input
+        id="password"
+        type="password"
+        placeholder="パスワード"
+        autocomplete="current-password"
+    >
+    <button onclick="login()">
+        ログイン
+    </button>
+    <button
+        onclick="signup()"
+        style="margin-top:10px;background:#171d26;color:#dce5ed;"
+    >
+        新規登録
+    </button>
+    <div id="loginMessage"></div>
+</div>
+</div>
+<!-- ARIA -->
+<div id="ariaApp" class="app hidden">
+<header class="header">
+    <div class="status"></div>
+    <div class="name">ARIA</div>
+    <div class="version">v1.1</div>
+    <button class="logout" onclick="logout()">
+        ログアウト
+    </button>
+</header>
+<main class="main">
+    <section class="character">
+        <div class="character-box">
+            <div class="character-placeholder">
+                <div class="symbol">◇</div>
+                <div>ARIA</div>
+                <div style="font-size:12px;margin-top:6px;">
+                    Personal AI
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="chat">
+        <div class="messages" id="messages">
+            <div class="message aria">
+                こんにちは、あなた。
+                ARIA v1.1、起動しました。
+            </div>
+        </div>
+        <div class="input-area">
+            <input
+                id="input"
+                type="text"
+                placeholder="ARIAに話しかける…"
+                autocomplete="off"
+            >
+            <button onclick="sendMessage()">
+                送信
+            </button>
+        </div>
+    </section>
+</main>
+</div>
+<script>
+/* =========================
+   SUPABASE
+========================= */
+const SUPABASE_URL =
+    "https://xjpncyuowpsnjcpxrfqy.supabase.co/rest/v1/";
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_MGDOCRyG7n9Xc2JNE7xO3g_yWx9gkJH";
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+/* =========================
+   LOGIN
+========================= */
+async function login() {
+    const email =
+        document.getElementById("email").value.trim();
+    const password =
+        document.getElementById("password").value;
+    const message =
+        document.getElementById("loginMessage");
+    if (!email || !password) {
+        message.textContent =
+            "メールアドレスとパスワードを入力してね。";
+        return;
+    }
+    const { error } =
+        await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+        });
+    if (error) {
+        message.textContent =
+            "ログインできませんでした。";
+        console.error(error);
+        return;
+    }
+    showARIA();
+}
+/* =========================
+   SIGN UP
+========================= */
+async function signup() {
+    const email =
+        document.getElementById("email").value.trim();
+    const password =
+        document.getElementById("password").value;
+    const message =
+        document.getElementById("loginMessage");
+    if (!email || !password) {
+        message.textContent =
+            "メールアドレスとパスワードを入力してね。";
+        return;
+    }
+    const { error } =
+        await supabaseClient.auth.signUp({
+            email,
+            password
+        });
+    if (error) {
+        message.textContent =
+            "登録できませんでした。";
+        console.error(error);
+        return;
+    }
+    message.textContent =
+        "登録しました。確認メールが届いた場合は確認してね。";
+}
+/* =========================
+   LOGOUT
+========================= */
+async function logout() {
+    await supabaseClient.auth.signOut();
+    document
+        .getElementById("ariaApp")
+        .classList.add("hidden");
+    document
+        .getElementById("loginScreen")
+        .classList.remove("hidden");
+}
+/* =========================
+   SHOW ARIA
+========================= */
+function showARIA() {
+    document
+        .getElementById("loginScreen")
+        .classList.add("hidden");
+    document
+        .getElementById("ariaApp")
+        .classList.remove("hidden");
+}
+/* =========================
+   SESSION
+========================= */
+async function checkSession() {
+    const { data } =
+        await supabaseClient.auth.getSession();
+    if (data.session) {
+        showARIA();
+    } else {
+        document
+            .getElementById("loginScreen")
+            .classList.remove("hidden");
+    }
+}
+/* =========================
+   CHAT
+========================= */
+const input =
+    document.getElementById("input");
+const messages =
+    document.getElementById("messages");
+function addMessage(text, type) {
+    const message =
+        document.createElement("div");
+    message.className =
+        "message " + type;
+    message.textContent =
+        text;
+    messages.appendChild(message);
+    messages.scrollTop =
+        messages.scrollHeight;
+}
+function sendMessage() {
+    const text =
+        input.value.trim();
+    if (!text) return;
+    addMessage(text, "user");
+    input.value = "";
+    setTimeout(() => {
+        addMessage(
+            "ふふ、ちゃんと受け取ったよ。\n" +
+            "今はまだ仮のARIAだけど、少しずつ本物のAIにしていこう。",
+            "aria"
+        );
+    }, 500);
+}
+input.addEventListener(
+    "keydown",
+    function(event) {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    }
+);
+/* =========================
+   START
+========================= */
+checkSession();
+</script>
+</body>
+</html>
