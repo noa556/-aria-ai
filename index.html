@@ -349,7 +349,6 @@ async function login() {
    SIGN UP
 ========================= */
 async function signup() {
-     alert("新しいsignupが動いてる！");
     const email =
         document.getElementById("email").value.trim();
     const password =
@@ -367,6 +366,15 @@ async function signup() {
             password
         });
     if (error) {
+        alert(
+
+        "Supabaseエラー\n\n" +
+
+        "message: " + error.message +
+
+        "\n\nstatus: " + error.status
+
+    );
         message.textContent =
             "登録できませんでした。";+ error.message;
         console.error(error);
