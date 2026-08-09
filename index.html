@@ -738,21 +738,6 @@ async function sendMessage() {
     input.value = "";
     showThinking();
 
-    // ARIA考え中表示
-    const thinkingMessage =
-        document.createElement("div");
-
-    thinkingMessage.className =
-        "message aria thinking";
-
-    thinkingMessage.textContent =
-        "🧠 ARIAが考えています…";
-
-    messages.appendChild(thinkingMessage);
-
-    messages.scrollTop =
-        messages.scrollHeight;
-
     try {
         const {
             data: { session }
