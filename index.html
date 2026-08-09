@@ -779,9 +779,6 @@ async function sendMessage() {
             );
         }
 
-        // 考え中表示を削除
-        thinkingMessage.remove();
-
         // ARIAの回答
      const ariaReply =
     data.message ||
@@ -812,9 +809,6 @@ await saveChatMessage(
         hideThinking();
 
         console.error(error);
-
-        // エラー時も考え中表示を削除
-        thinkingMessage.remove();
 
         addMessage(
             "ごめんね、ARIAの通信でエラーが起きたみたい。\n" +
