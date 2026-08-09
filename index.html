@@ -709,8 +709,245 @@ checkSession();
             .getElementById("ariaApp")
             .classList.remove("hidden");
     }
-   async function loadMemories() {
-    console.log("=== loadMemories START ===");
+  async function loadMemories() {
+    const memoryList = document.getElementById("memoryList");
+    const searchInput = document.getElementById("memorySearch");
+
+    if (!memoryList) return;
+
+    const search = searchInput
+        ? searchInput.value.trim()
+        : "";
+
+    memoryList.innerHTML =
+        '<div class="memory-empty">読み込んでいます…</div>';
+
+    try {
+        const {
+            data: { session }
+        } = await supabaseClient.auth.getSession();
+
+        if (!session) {
+            memoryList.innerHTML =
+                '<div class="memory-empty">ログインしてください。</div>';
+            return;
+        }
+
+        let query = supabaseClient
+            .from("aria_memory")
+            .select("id, memory, created_at")
+            .eq("user_id", session.user.id)
+            .order("created_at", {
+                ascending: false
+            });
+
+        if (search) {
+            query = query.ilike(
+                "memory",
+                `%${search}%`
+            );
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+            console.error("Memory load error:", error);
+
+            memoryList.innerHTML =
+                '<div class="memory-empty">Memoryを読み込めませんでした。</div>';
+
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            memoryList.innerHTML =
+                '<div class="memory-empty">Memoryはまだありません。</div>';
+            return;
+        }
+
+        memoryList.innerHTML = "";
+
+        data.forEach((item) => {
+            const card = document.createElement("div");
+            card.className = "memory-card";
+
+            const text = document.createElement("div");
+            text.className = "memory-text";
+            text.textContent = item.memory || "";
+
+            const date = document.createElement("div");
+            date.className = "memory-date";
+
+            date.textContent = item.created_at
+                ? new Date(item.created_at).toLocaleString("ja-JP")
+                : "";
+
+            const buttons = document.createElement("div");
+            buttons.style.display = "flex";
+            buttons.style.gap = "8px";
+            buttons.style.marginTop = "12px";
+
+            const editButton = document.createElement("button");
+            editButton.className = "memory-delete";
+            editButton.style.color = "#c7d8e8";
+            editButton.style.borderColor = "#303946";
+            editButton.textContent = "✏️ 編集";
+
+            editButton.onclick = () => {
+                editMemory(item.id, item.memory || "");
+            };
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "memory-delete";
+            deleteButton.textContent = "🗑️ 削除";
+
+            deleteButton.onclick = () => {
+                deleteMemory(item.id);
+            };
+
+            buttons.appendChild(editButton);
+            buttons.appendChild(deleteButton);
+
+            card.appendChild(text);
+            card.appendChild(date);
+            card.appendChild(buttons);
+
+            memoryList.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("Memory error:", error);
+
+        memoryList.innerHTML =
+            '<div class="memory-empty">Memoryの読み込み中にエラーが発生しました。</div>';
+    }
+}
+    async function addMemory() {
+    const memory = prompt(
+        "ARIAに覚えさせる内容を入力してください。"
+    );
+
+    if (memory === null) return;
+
+    const text = memory.trim();
+
+    if (!text) {
+        alert("Memoryを入力してください。");
+        return;
+    }
+
+    try {
+        const {
+            data: { session }
+        } = await supabaseClient.auth.getSession();
+
+        if (!session) {
+            alert("ログインしてください。");
+            return;
+        }
+
+        const { error } = await supabaseClient
+            .from("aria_memory")
+            .insert({
+                user_id: session.user.id,
+                memory: text
+            });
+
+        if (error) {
+            console.error("Memory insert error:", error);
+            alert("Memoryの保存に失敗しました。");
+            return;
+        }
+
+        await loadMemories();
+
+    } catch (error) {
+        console.error(error);
+        alert("Memoryの保存中にエラーが発生しました。");
+    }
+}
+    async function editMemory(id, oldMemory) {
+    const newMemory = prompt(
+        "Memoryを編集してください。",
+        oldMemory
+    );
+
+    if (newMemory === null) return;
+
+    const text = newMemory.trim();
+
+    if (!text) {
+        alert("Memoryを空にすることはできません。");
+        return;
+    }
+
+    try {
+        const {
+            data: { session }
+        } = await supabaseClient.auth.getSession();
+
+        if (!session) {
+            alert("ログインしてください。");
+            return;
+        }
+
+        const { error } = await supabase
+            .from("aria_memory")
+            .update({
+                memory: text
+            })
+            .eq("id", id)
+            .eq("user_id", session.user.id);
+
+        if (error) {
+            console.error("Memory update error:", error);
+            alert("Memoryの更新に失敗しました。");
+            return;
+        }
+
+        await loadMemories();
+
+    } catch (error) {
+        console.error(error);
+        alert("Memoryの更新中にエラーが発生しました。");
+    }
+}
+    async function deleteMemory(id) {
+    const confirmed = confirm(
+        "このMemoryを削除しますか？"
+    );
+
+    if (!confirmed) return;
+
+    try {
+        const {
+            data: { session }
+        } = await supabaseClient.auth.getSession();
+
+        if (!session) {
+            alert("ログインしてください。");
+            return;
+        }
+
+        const { error } = await supabase
+            .from("aria_memory")
+            .delete()
+            .eq("id", id)
+            .eq("user_id", session.user.id);
+
+        if (error) {
+            console.error("Memory delete error:", error);
+            alert("Memoryの削除に失敗しました。");
+            return;
+        }
+
+        await loadMemories();
+
+    } catch (error) {
+        console.error(error);
+        alert("Memoryの削除中にエラーが発生しました。");
+    }
+}
 
     const memoryList =
         document.getElementById("memoryList");
