@@ -770,6 +770,7 @@ input.addEventListener(
         }
     }
 );
+    loadChatHistory();
 /* =========================
    START
 ========================= */
@@ -963,6 +964,68 @@ async function loadMemories() {
 
         memoryList.innerHTML =
             '<div class="memory-empty">Memoryの読み込み中にエラーが発生しました。</div>';
+    }
+}
+    /* =========================
+   CHAT HISTORY LOAD
+========================= */
+
+async function loadChatHistory() {
+
+    try {
+
+        const {
+            data: { session }
+        } = await supabaseClient.auth.getSession();
+
+        if (!session) return;
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("aria_chat_history")
+            .select("role, message, created_at")
+            .eq("user_id", session.user.id)
+            .order("created_at", {
+                ascending: true
+            });
+
+        if (error) {
+
+            console.error(
+                "Chat history load error:",
+                error
+            );
+
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            return;
+        }
+
+        messages.innerHTML = "";
+
+        data.forEach((item) => {
+
+            addMessage(
+                item.message,
+                item.role
+            );
+
+        });
+
+        messages.scrollTop =
+            messages.scrollHeight;
+
+    } catch (error) {
+
+        console.error(
+            "Chat history error:",
+            error
+        );
+
     }
 }
 
