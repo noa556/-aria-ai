@@ -736,6 +736,7 @@ async function sendMessage() {
     addMessage(text, "user");
     await saveChatMessage("user", text);
     input.value = "";
+    showThinking();
 
     // ARIA考え中表示
     const thinkingMessage =
