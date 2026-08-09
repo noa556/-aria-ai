@@ -785,6 +785,7 @@ async function sendMessage() {
 
         const data =
             await response.json();
+        hideThinking();
 
         if (!response.ok) {
             throw new Error(
