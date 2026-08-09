@@ -467,10 +467,10 @@ async function sendMessage() {
             throw new Error(data.error || "Function error");
         }
 
-       addMessage(
+     addMessage(
     data.message || "返事を受け取れませんでした。",
     "aria"
-
+);
     } catch (error) {
         console.error(error);
 
