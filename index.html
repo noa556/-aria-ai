@@ -228,11 +228,15 @@ input {
     }
 }
 .memory-screen {
-    position: absolute;
-    inset: 64px 0 0 0;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: #0b0e13;
     padding: 40px 32px 24px;
     overflow-y: auto;
+    z-index: 10;
 }
 .memory-header {
     display: flex;
