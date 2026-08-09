@@ -627,10 +627,42 @@ function addMessage(text, type) {
         messages.scrollHeight;
 }
 async function sendMessage() {
+    async function saveChatMessage(role, message) {
+    try {
+        const {
+            data: { session }
+        } = await supabaseClient.auth.getSession();
+
+        if (!session) return;
+
+        const { error } =
+            await supabaseClient
+                .from("aria_chat_history")
+                .insert({
+                    user_id: session.user.id,
+                    role: role,
+                    message: message
+                });
+
+        if (error) {
+            console.error(
+                "Chat history save error:",
+                error
+            );
+        }
+
+    } catch (error) {
+        console.error(
+            "Chat history error:",
+            error
+        );
+    }
+}
     const text = input.value.trim();
     if (!text) return;
 
     addMessage(text, "user");
+    await saveChatMessage("user", text);
     input.value = "";
 
     // ARIA考え中表示
@@ -692,11 +724,16 @@ async function sendMessage() {
         thinkingMessage.remove();
 
         // ARIAの回答
-        addMessage(
-            data.message ||
-            "返事を受け取れませんでした。",
-            "aria"
-        );
+     const ariaReply =
+    data.message ||
+    "返事を受け取れませんでした。";
+
+addMessage(ariaReply, "aria");
+
+await saveChatMessage(
+    "aria",
+    ariaReply
+);
 
         // Memory追加通知
         if (
