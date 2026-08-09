@@ -633,49 +633,90 @@ async function sendMessage() {
     addMessage(text, "user");
     input.value = "";
 
-    try {
-        const { data: { session } } =
-    await supabaseClient.auth.getSession();
+    // ARIA考え中表示
+    const thinkingMessage =
+        document.createElement("div");
 
-if (!session) {
-    throw new Error("ログインセッションがありません。");
-}
+    thinkingMessage.className =
+        "message aria thinking";
+
+    thinkingMessage.textContent =
+        "🧠 ARIAが考えています…";
+
+    messages.appendChild(thinkingMessage);
+
+    messages.scrollTop =
+        messages.scrollHeight;
+
+    try {
+        const {
+            data: { session }
+        } = await supabaseClient.auth.getSession();
+
+        if (!session) {
+            throw new Error(
+                "ログインセッションがありません。"
+            );
+        }
 
         const response = await fetch(
             "https://xjpncyuowpsnjcpxrfqy.supabase.co/functions/v1/aria-chat",
             {
                 method: "POST",
+
                 headers: {
                     "Content-Type": "application/json",
                     "apikey": SUPABASE_PUBLISHABLE_KEY,
-                    "Authorization": "Bearer " + session.access_token
+                    "Authorization":
+                        "Bearer " +
+                        session.access_token
                 },
+
                 body: JSON.stringify({
                     message: text
                 })
             }
         );
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
         if (!response.ok) {
-            throw new Error(data.error || "Function error");
+            throw new Error(
+                data.error ||
+                "Function error"
+            );
         }
 
-     addMessage(
-    data.message || "返事を受け取れませんでした。",
-    "aria"
-);
-        if (data.memoryAdded && data.addedMemory) {
-    addMessage(
-        "🧠 Memoryに追加しました\n「" +
-        data.addedMemory +
-        "」",
-        "aria"
-    );
-}
+        // 考え中表示を削除
+        thinkingMessage.remove();
+
+        // ARIAの回答
+        addMessage(
+            data.message ||
+            "返事を受け取れませんでした。",
+            "aria"
+        );
+
+        // Memory追加通知
+        if (
+            data.memoryAdded &&
+            data.addedMemory
+        ) {
+            addMessage(
+                "🧠 Memoryに追加しました\n「" +
+                data.addedMemory +
+                "」",
+                "aria"
+            );
+        }
+
     } catch (error) {
+
         console.error(error);
+
+        // エラー時も考え中表示を削除
+        thinkingMessage.remove();
 
         addMessage(
             "ごめんね、ARIAの通信でエラーが起きたみたい。\n" +
