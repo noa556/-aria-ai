@@ -666,6 +666,14 @@ if (!session) {
     data.message || "返事を受け取れませんでした。",
     "aria"
 );
+        if (data.memoryAdded && data.addedMemory) {
+    addMessage(
+        "🧠 Memoryに追加しました\n「" +
+        data.addedMemory +
+        "」",
+        "aria"
+    );
+}
     } catch (error) {
         console.error(error);
 
