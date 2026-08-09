@@ -688,16 +688,18 @@ input.addEventListener(
    START
 ========================= */
 checkSession();
-     function showMemory() {
-        document
-            .getElementById("ariaApp")
-            .classList.add("hidden");
+    function showMemory() {
+    document
+        .getElementById("ariaApp")
+        .classList.add("hidden");
 
-        document
-            .getElementById("memoryScreen")
-            .classList.remove("hidden");
-    }
+    document
+        .getElementById("memoryScreen")
+        .classList.remove("hidden");
 
+    loadMemories();
+}
+    
     function showChat() {
         document
             .getElementById("memoryScreen")
