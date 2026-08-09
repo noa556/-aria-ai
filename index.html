@@ -227,6 +227,115 @@ input {
         max-width: 85%;
     }
 }
+    .memory-screen {
+    position: absolute;
+    inset: 64px 0 0 0;
+    background: #0b0e13;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.memory-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.memory-header button {
+    border: 1px solid #303946;
+    background: #171c24;
+    color: #dce5ed;
+    border-radius: 10px;
+    padding: 8px 12px;
+}
+
+.memory-title {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.memory-subtitle {
+    color: #8993a1;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.memory-tools {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.memory-tools input {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid #303946;
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: #171c24;
+    color: white;
+    outline: none;
+}
+
+.memory-tools button {
+    border: none;
+    border-radius: 12px;
+    padding: 0 16px;
+    background: #dce5ed;
+    color: #11151b;
+    font-weight: 600;
+}
+
+.memory-card {
+    background: #10141b;
+    border: 1px solid #252e39;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.memory-text {
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.memory-date {
+    color: #8993a1;
+    font-size: 11px;
+    margin-top: 10px;
+}
+
+.memory-delete {
+    margin-top: 12px;
+    border: 1px solid #4a3030;
+    background: transparent;
+    color: #e6a5a5;
+    border-radius: 9px;
+    padding: 6px 10px;
+}
+
+.memory-empty {
+    text-align: center;
+    color: #8993a1;
+    padding: 40px 20px;
+}
+
+@media (max-width: 700px) {
+
+    .memory-screen {
+        padding: 14px;
+    }
+
+    .memory-tools {
+        flex-direction: column;
+    }
+
+    .memory-tools button {
+        padding: 12px;
+    }
+
+}
 </style>
 </head>
 <body>
@@ -267,6 +376,11 @@ input {
     <div class="status"></div>
     <div class="name">ARIA</div>
     <div class="version">v1.1</div>
+    
+    <button class="memory-button" onclick="showMemory()">
+    🧠 Memory
+    </button>
+    
     <button class="logout" onclick="logout()">
         ログアウト
     </button>
@@ -303,6 +417,47 @@ input {
         </div>
     </section>
 </main>
+    
+    <section id="memoryScreen" class="memory-screen hidden">
+
+    <div class="memory-header">
+        <button onclick="showChat()">
+            ← ARIA
+        </button>
+
+        <div>
+            <div class="memory-title">
+                🧠 ARIA Memory
+            </div>
+
+            <div class="memory-subtitle">
+                ARIAが覚えていること
+            </div>
+        </div>
+    </div>
+
+    <div class="memory-tools">
+
+        <input
+            id="memorySearch"
+            type="text"
+            placeholder="Memoryを検索…"
+            oninput="loadMemories()"
+        >
+
+        <button onclick="addMemory()">
+            ＋ Memoryを追加
+        </button>
+
+    </div>
+
+    <div id="memoryList">
+        <div class="memory-empty">
+            Memoryを読み込んでいます…
+        </div>
+    </div>
+
+</section>
 </div>
 <script>
 /* =========================
