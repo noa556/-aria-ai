@@ -709,9 +709,14 @@ checkSession();
             .getElementById("ariaApp")
             .classList.remove("hidden");
     }
-    async function loadMemories() {
+   async function loadMemories() {
+    console.log("=== loadMemories START ===");
+
     const memoryList =
         document.getElementById("memoryList");
+
+    console.log("memoryList:", memoryList);
+    console.log("supabaseClient:", supabaseClient);
 
     const search =
         document
@@ -723,10 +728,13 @@ checkSession();
         '<div class="memory-empty">読み込んでいます…</div>';
 
     try {
-        const {
-            data: { session }
-        } = await supabaseClient.auth.getSession();
+       console.log("Session取得開始");
 
+const {
+    data: { session }
+} = await supabaseClient.auth.getSession();
+
+console.log("Session:", session);
         if (!session) {
             memoryList.innerHTML =
                 '<div class="memory-empty">ログインしてください。</div>';
@@ -748,7 +756,12 @@ checkSession();
             );
         }
 
-        const { data, error } = await query;
+      console.log("Memory取得開始");
+
+const { data, error } = await query;
+
+console.log("Memory data:", data);
+console.log("Memory error:", error);
 
         if (error) {
             console.error(
